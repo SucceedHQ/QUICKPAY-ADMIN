@@ -18,7 +18,9 @@ export async function adminCall(action: string, payload: any = {}) {
   if (!res.ok) {
     if (res.status === 401) {
        sessionStorage.removeItem('adminToken');
-       window.location.href = '/';
+       if (action !== 'login') {
+         window.location.href = '/';
+       }
     }
     throw new Error(data.error || 'API Error');
   }
