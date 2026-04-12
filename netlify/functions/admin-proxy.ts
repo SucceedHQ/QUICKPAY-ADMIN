@@ -15,17 +15,22 @@ export const handler: Handler = async (event) => {
 
   const cors = { 'Access-Control-Allow-Origin': '*' };
 
-  const adminSecret = event.headers['admin-secret'] || event.headers['admin_secret'];
-  if (adminSecret !== process.env.ADMIN_SECRET && adminSecret !== 'local-admin-secret-dev') {
-    return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Unauthorized' }) };
-  }
+  try {
+    const { action, payload } = JSON.parse(event.body || '{}');
+
+    // Skip secret validation only for the login action
+    if (action !== 'login') {
+      const adminSecret = event.headers['admin-secret'] || event.headers['admin_secret'];
+      if (adminSecret !== process.env.ADMIN_SECRET && adminSecret !== 'local-admin-secret-dev') {
+        return { statusCode: 401, headers: cors, body: JSON.stringify({ error: 'Unauthorized' }) };
+      }
+    }
 
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: cors, body: 'Method Not Allowed' };
   }
 
-  try {
-    const { action, payload } = JSON.parse(event.body || '{}');
+
     
     switch(action) {
       case 'login':
