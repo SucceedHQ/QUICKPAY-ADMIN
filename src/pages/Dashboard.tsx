@@ -6,14 +6,33 @@ import { format } from 'date-fns';
 
 export default function Dashboard() {
   const [stats, setStats] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    adminCall('getDashboardStats').then(setStats).catch(console.error);
+    adminCall('getDashboardStats')
+      .then(setStats)
+      .catch(err => {
+        console.error(err);
+        setError(err.message || 'Failed to load dashboard metrics.');
+      });
   }, []);
 
   const formatNgn = (val: number) => '₦' + val.toLocaleString('en-NG', { minimumFractionDigits: 2 });
 
-  if (!stats) return <div className="p-8 text-gray-500 font-medium">Loading dashboard overview...</div>;
+  if (error) return (
+    <div className="p-12 text-center bg-white rounded-2xl border shadow-sm">
+      <div className="w-16 h-16 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+        <Landmark className="w-8 h-8" />
+      </div>
+      <h2 className="text-xl font-bold text-gray-900 mb-2">Dashboard Error</h2>
+      <p className="text-gray-500 max-w-sm mx-auto mb-6">{error}</p>
+      <button onClick={() => window.location.reload()} className="px-6 py-2 bg-gray-900 text-white rounded-full font-bold hover:bg-black transition-colors">
+        Try Again
+      </button>
+    </div>
+  );
+
+  if (!stats) return <div className="p-8 text-gray-500 font-medium animate-pulse">Loading dashboard overview...</div>;
 
   return (
     <div className="space-y-8">
